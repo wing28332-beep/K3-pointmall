@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#fff7ce"/>
+      <stop offset="0.52" stop-color="#f8b66d"/>
+      <stop offset="1" stop-color="#7b2b0d"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="32" y1="28" x2="226" y2="228">
+      <stop offset="0" stop-color="#fff4a8"/>
+      <stop offset="0.32" stop-color="#e9a83a"/>
+      <stop offset="0.7" stop-color="#fff0a0"/>
+      <stop offset="1" stop-color="#a64c17"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="34" fill="#2b0d06"/>
+  <circle cx="128" cy="128" r="104" fill="url(#bg)"/>
+  <circle cx="128" cy="128" r="86" fill="none" stroke="#fff3c5" stroke-width="5" stroke-dasharray="3 11"/>
+  <circle cx="128" cy="128" r="70" fill="none" stroke="url(#gold)" stroke-width="13"/>
+  <path d="M128 36l12 36 37-11-18 34 33 18-36 10 10 37-31-21-27 26 2-38-38-3 34-19-15-35 35 13z" fill="#fff7c2" opacity=".42" filter="url(#glow)"/>
+  <path d="M55 128c22-48 72-71 122-49-33 5-60 28-72 61 27-15 59-13 86 5-53 48-118 40-136-17z" fill="#7b2308" opacity=".3"/>
+  <path d="M74 72c22-20 56-28 89-19-22 12-39 29-51 52-11-15-23-25-38-33z" fill="#fff4b8" opacity=".65"/>
+  <path d="M48 42h42l-18 18 18 18H48zM208 214h-42l18-18-18-18h42z" fill="url(#gold)" opacity=".9"/>
+</svg>

@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Epic War</title>
+  <meta charset="UTF-8">
+  <meta name="Keywords" content="Epic War" />
+  <meta name="Description" content="Epic War" />
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+  <!-- <meta property="og:image" content="images/shareIcon.png" /> -->
+  <script src="/lib/jquery/jquery-1.11.1.min.js"></script>
+  <link rel="stylesheet" href="/lib/swiper/swiper.min.css">
+  <script src="/lib/swiper/swiper.min.js"></script>
+  <script type="text/javascript" src="/lib/vue@2.6/vue.min.js"></script>
+  <script type="text/javascript" src="js/login.oversea.js"></script>
+  <script type="text/javascript" src="js/fingerprint2.min.js"></script>
+  <script src="js/i18nMessages.js"></script>
+  <script src="js/vue-i18n.min.js"></script>
+  <script src="js/md5.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/api.js"></script>
+  <script src="https://h5-ea.q1.com/js/thinking.js"></script>
+  <link rel="stylesheet" href="/lib/vant@2.10/index.css" />
+  <script type="text/javascript" src="/lib/vant@2.10/vant.min.js"></script>
+  <script src="js/component/vip.js"></script> <!-- 引入组件 -->
+  <link rel="stylesheet" href="css/prd-drawer.css">
+  <!-- <link rel="shortcut icon" href="images/favicon.ico" /> -->
+  <script type="text/javascript">
+    var ua = navigator.userAgent
+    var isMobileDevice = /iPhone|iPad|iPod|Android|Windows Phone|webOS|BlackBerry|IEMobile|Opera Mini|Tablet|Mobile/i.test(ua)
+    var isMac = /Macintosh/i.test(ua)
+    var isTouchDevice = 'ontouchstart' in window
+    var urlCode = window.location.search,
+      urlHash = window.location.hash
+    var isMobile = isMobileDevice || (isMac && isTouchDevice)
+    if (isMobile) {
+      !(function () {
+        function a () {
+          document.documentElement.style.fontSize =
+            (((document.documentElement.clientWidth / 1080) * 10) / 16) *
+            1000 +
+            '%'
+        }
+        var b = null
+        window.addEventListener(
+          'resize',
+          function () {
+            clearTimeout(b)
+            b = setTimeout(a, 300)
+          },
+          !1
+        )
+        a()
+      })(window)
+      document.write('<link rel="stylesheet" href="css/index_m.css">')
+    } else {
+      document.write('<link rel="stylesheet" href="css/index.css">')
+    }
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <div class="levitate">
+      <a @click="goService" class="serviceBtn"></a>
+      <a @click="onKnapsack()" class="backpackBtn" v-show="isContainerList===1"></a>
+      <!--  <a @click="onTutorial" class="tutorial"></a> -->
+    </div>
+    <div class="nav">
+      <div class="logo"><img src="images/logo.png" alt=""></div>
+      <div class="nav_btn">
+        <div class="pay" @click="onPoints('recharge_button')">{{$t('getPoints')}}</div>
+        <button type="button" class="prd_nav_btn" id="prdDrawerOpen">PRD</button>
+        <!-- <div class="rules" @click="isMask=isPopupRule=true">{{$t('eventRules')}}</div> -->
+      </div>
+      <div class="selectBox">
+        <div class="selectBtn" @click="isShowOption=!isShowOption">
+          <p>{{activeLang.language}}</p>
+          <span class="icons icon_arrow"></span>
+        </div>
+        <div class="worlds" v-show="isShowOption">
+          <ul class="selectList">
+            <li v-for="item in langArr" @click="changeLang(item)"
+              :class="item.language==activeLang.language?'focus':''">
+              {{item.language}}<span class="mark"></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="slogan">
+      <img src="images/slogan_US.png?v=1" alt=""
+        v-if="activeLang.locale==='RU'||activeLang.locale==='TR'||activeLang.locale==='PL'||activeLang.locale==='PT'||activeLang.locale==='UK'||activeLang.locale==='RO'">
+      <img :src="'images/slogan_'+activeLang.locale+'.png?v=1'" alt="" v-else>
+    </div>
+    <div class="top">
+      <div class="login">
+        {{$t('dearLordLogIn')}}
+        <div class="login_btn" @click="onLogin()">
+          <div class="user_btn_left"></div>
+          <div class="user_btn_cent">{{$t('login')}}</div>
+          <div class="user_btn_right"></div>
+        </div>
+      </div>
+      <div class="login_user_portion" v-if="isLogin">
+        <div class="left">
+          <div class="user_box">
+            <img class="img" src="./images/default_profile_img.png" alt="">
+            <span class="level">LV.{{selectedInfo.memberLevel}}</span>
+          </div>
+          <div class="msg">
+            <div class="name_account">
+              {{selectedInfo.actorName}}(id:{{selectedInfo.actorId}}) &nbsp; {{selectedInfo.worldName}} &nbsp;
+              {{selectedInfo.userName}} <span class="switch" @click="onLogin()"></span>
+            </div>
+            <div class="integral_empirical">
+              {{$t('points')}}：<span class="num" @click="recordPopup(0)">{{selectedInfo.points}}</span>
+              {{$t('exp')}}：<span class="num" @click="recordPopup(1)">{{selectedInfo.exp}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="right" @click="popup(4)">
+          <div class="user_btn_left"></div>
+          <div class="user_btn_cent">{{$t('logout')}}</div>
+          <div class="user_btn_right"></div>
+        </div>
+      </div>
+      <div class="select_tab">
+        <span class="on" @click="noTopTab(0)"> {{$t('redDiamondPointStore')}}<i class="activity_rules"
+            @click.stop="isMask=isPopupRule=true"></i></span>
+        <span @click="noTopTab(1)"> {{$t('vipCenter')}}<i class="activity_rules"
+            @click.stop="isMask=isVipPopupRule=true"></i></span>
+        <!-- <em class="vip_icon"></em> -->
+      </div>
+    </div>
+    <!-- 记录弹窗 -->
+    <div class="record_popup_portion" v-show="isRecordPopup">
+      <div class="popup_close" @click="isMask=isRecordPopup=false"></div>
+      <div class="record_tab">
+        <span class="tab_title" :style=" isIntegral ? recordActiveStyle:recordInitStyle"
+          @click="recordSwitch(0)">{{$t('pointsRecord')}}</span>
+        <span class="tab_title" :style=" isEmpirical ? recordActiveStyle:recordInitStyle"
+          @click="recordSwitch(1)">{{$t('expRecord')}}</span>
+      </div>
+      <div class="indate">
+        ({{$t('vipDisplayed')}})
+      </div>
+      <div class="content">
+        <div class="integral_box" v-show="isIntegral" :key="actorId">
+          <div class="popup_record_title">
+            <span>{{$t('exchangeDate')}}</span>
+            <span>{{$t('points')}}</span>
+            <span>{{$t('reason')}}</span>
+          </div>
+          <ul>
+            <li class="popup_record_li" v-for="item in vipPointsRecordData">
+              <span>{{item.changeTime | utcTimeFormat}}</span>
+              <span :class="changeWayEnum[item.changeWay] ? changeWayEnum[item.changeWay].type:''"
+                class="num">{{changeWayEnum[item.changeWay]&&item.number ? changeWayEnum[item.changeWay].type==='del' ?
+                '-': '+' : '' }}{{item.number}}</span>
+              <span>{{changeWayEnum[item.changeWay] ? $t(changeWayEnum[item.changeWay].field) : ''}}</span>
+            </li>
+          </ul>
+        </div>
+        <div class="empirical_box" v-show="isEmpirical" :key="actorId">
+          <div class="popup_record_title">
+            <span>{{$t('exchangeDate')}}</span>
+            <span>{{$t('vipLevel')}}</span>
+            <span>{{$t('vipEXP')}}</span>
+            <span>{{$t('vipRebatePoints')}}</span>
+          </div>
+          <ul>
+            <li class="popup_record_li" v-for="item in vipExpRecordData">
+              <span>{{item.changeTime | utcTimeFormat}}</span>
+              <span>LV.{{item.level}}</span>
+              <span class="num">{{item.exp ? '+'+item.exp : item.exp}}</span>
+              <span class="num">{{item.points ? '+'+item.points : item.points}}</span>
+            </li>
+          </ul>
+        </div>
+        <div class="hint">{{$t('networkFluctuation')}}</div>
+      </div>
+    </div>
+    <!-- 积分商城 -->
+    <div class="integral_shopping_mall" v-show="isContainerList===0">
+      <div class="main">
+        <div class="menu">
+          <div class="menu_list" @click="isReward=true;isRecord=false">
+            <span>{{$t('exchangeList')}}</span>
+          </div>
+          <div class="menu_list" @click="onTradeRecord()">
+            <span>{{$t('exchangeRecords')}}</span>
+          </div>
+        </div>
+        <div class="tab list">
+          <!-- 商品列表 -->
+          <div v-show="isReward">
+            <div class="list_top">
+              <div class="on" @click="onRreward(0)">{{$t('all')}}<i>▼</i><span></span></div>
+              <div @click="onRreward(1)">{{$t('availableForExchange')}}<i>▼</i><span></span></div>
+            </div>
+            <!-- 全部商品列表 -->
+            <div class="reward">
+              <div class="reward_list" v-for="item in commodityListData">
+                <div class="reward_hot" v-if="item.superValue"></div>
+                <div class="reward_img" @click="showRewardDetail(item)"><img
+                    :src="item.pic || getGeneratedRewardImage(item.name, 'commodity')"
+                    @error="setFallbackImage($event,item.name,'commodity')" alt=""></div>
+                <div class="reward_text">
+                  <div class="p1">
+                    <div class="name"><span>{{item.name}}</span></div>
+                    <div class="time">
+                      <p>{{$t('start')}}: {{item.publishTime | utcTimeFormat}}</p>
+                      <p>{{$t('beenden')}}: <span v-if="item.unPublishTime">{{item.unPublishTime |
+                          utcTimeFormat}}</span>
+                        <span v-else>--</span>
+                      </p>
+                      <!-- <p :id="'time' + item.id" v-cloak
+                        v-if="item.publishTime > new Date().getTime() && !(!item.surplusStock&&!item.unlimitedStock)">
+                        {{$t('start')}}:
+                        <countdown :id="item.id" :publishtime="item.publishTime" :currenttime="item.currentTime"
+                          @countends="countends"></countdown>
+                      </p>
+                      <p v-else><span v-if="item.unPublishTime">{{$t('beenden')}}:</span>
+                        <countdown :id="item.id" :publishtime="item.unPublishTime" :currenttime="item.currentTime"
+                          @countends="countends"></countdown> -->
+                      <!-- <span v-else>--</span> -->
+                      </p>
+                    </div>
+                  </div>
+                  <div class="p2">
+                    <div class="p2_left">
+                      <div class="p2_left_list">
+                        <p v-for="(itemGoods ,indexGoods) in item.goodsInfos" class="commodity_prop"
+                          v-if="indexGoods<=1">
+                          {{itemGoods.goodsName}}*{{itemGoods.goodsNum}}
+                        </p>
+                      </div>
+
+                      <p class="color_c61bfe"> {{ item.points === 0 ? $t('itemsWelfare') :
+                        $t('pointsSpent') + ':&nbsp;' + item.points
+                        }}</p>
+                      <!-- <p>{{item.description}}</p> -->
+                      <p v-if="item.limitType !== 1&&item.limitTrade===4" class="forExchange">
+                        {{ $t('exchangeTotalTimes', {time: item.limitTadeValue.split(',')[1]}) }}
+                      </p>
+                      <p v-if="item.limitType !== 1 && item.limitTrade===1" class="forExchange">
+                        {{ $t('exchangeTimes', {time: item.limitTadeValue.split(',')[1], day:
+                        item.limitTadeValue.split(',')[0]}) }}
+                      </p>
+                    </div>
+                    <div>
+                      <div
+                        :class="['btn',(!item.surplusStock&&!item.unlimitedStock) || (item.surplusStock===0 && item.unlimitedStock===0) || item.publishTime > item.currentTime ?'excDisabledBtn':'']">
+                        <div class="excbtn_cent" @click="onTradePopup(item)">{{item.surplusStock===0 &&
+                          item.unlimitedStock
+                          === 0 ? $t('soldOut') : $t('exchange')}}
+                        </div>
+                      </div>
+                      <!--  <p class="countdown" :id="'time' + item.id" v-cloak
+                        v-if="item.publishTime > new Date().getTime() && !(!item.surplusStock&&!item.unlimitedStock)">
+                        <countdown :id="item.id" :publishtime="item.publishTime" :currenttime="item.currentTime"
+                          @countends="countends"></countdown>
+                      </p> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 兑换记录 -->
+          <div class="record" v-show="isRecord">
+            <div class="record_title">
+              <span>{{$t('exchangeDate')}}</span>
+              <span>{{$t('pointsSpent')}}</span>
+              <span>{{$t('items')}}</span>
+            </div>
+            <ul>
+              <li v-for="item in exchangeRecordsData">
+                <span>{{item.createTime | utcTimeFormat}}</span>
+                <span>{{item.points}}</span>
+                <span>{{item.name}}</span>
+              </li>
+            </ul>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- 会员中心 -->
+    <div v-show="isContainerList===1">
+      <vip ref="vipComp" @onlogin="onLogin" @changemask="changeMask" :is-container-list="isContainerList"
+        :selected-info="selectedInfo" :is-login="isLogin"></vip>
+    </div>
+    <!-- 活动规则 -->
+    <div class="vip_popup_rule" v-show="isVipPopupRule">
+      <div class="vip_popup_close" @click="isMask=isVipPopupRule=false"></div>
+      <div class="vip_rule_box">
+        <p class="part_three_content gradient_text vip_rules_text">{{ $t("eventRules")}}</p>
+        <div class="vip_rule_content">
+          <div class="vip_rule_item"><span class="num num1"></span>
+            <span class="text">{{ $t("perRechargeAccumulate")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num2"></span>
+            <span class="text">{{ $t("expStatisticsTime")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num3"></span>
+            <span class="text">{{ $t("vipPointsInstructionsForGiving")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num4"></span>
+            <span class="text">{{ $t("ruleLevelPack")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num5"></span>
+            <span class="text">{{ $t("ruleWeeklyPack")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num6"></span>
+            <span class="text">{{ $t("rulePackGrant")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num7"></span>
+            <span class="text">{{ $t("pleaseLogPointMall")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num8"></span>
+            <span class="text">{{ $t("moerVipLevelComingSoon")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num9"></span>
+            <span class="text">{{ $t("contactTheAuthorities")}}</span>
+          </div>
+          <div class="vip_rule_item"><span class="num num10"></span>
+            <span class="text">{{ $t("anythingOutOfTheOrdinary")}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--  <div class="body_bt"></div> -->
+    <div class="bottom">
+      <div class="copyright">
+        <p class="icons contactUs">{{$t('followUs')}}</p>
+        <div>
+          <!-- <a href="javascript:;" class="icons icon_index" @click="goIndex"></a> -->
+          <a href="https://www.facebook.com/EpicWarGlobal/" target="_blank" class="icon_fb"></a>
+          <div>
+            <!--  <p v-if="activeLang.locale=== 'JA'">{{$t('guide10')}}</p>
+            <p v-else>{{$t('guide9')}}</p> -->
+            <p>{{$t('guide9')}}</p>
+          </div>
+
+        </div>
+        <p class="copyrightLink"><a href="https://sites.google.com/view/ew-privacy-policy/terms-of-service"
+            target="_blank">Policy</a>|<a href="https://sites.google.com/view/ew-privacy-policy/terms-of-service"
+            target="_blank">Terms</a></p>
+
+      </div>
+    </div>
+
+    <div class="mask" v-show="isMask"></div>
+    <div class="popup_rule" v-show="isPopupRule">
+      <div class="popup_title"><span>{{$t('eventRules')}}</span></div>
+      <div class="popup_close" @click="isMask=isPopupRule=false"></div>
+      <div class="popup_rule_cent">
+        <p>{{$t('eventRulesList1')}}</p>
+        <p>{{$t('eventRulesList2')}}</p>
+        <p>{{$t('eventRulesList3')}}</p>
+        <p>{{$t('eventRulesList4')}}</p>
+        <p>{{$t('eventRulesList5')}}</p>
+        <p>{{$t('eventRulesList6')}}</p>
+      </div>
+    </div>
+
+    <div class="popup" v-show="isPopup">
+      <div class="popup_close" @click="isMask=isPopup=false,commodityNum=1,isPlusBtn=true,disabled=false"></div>
+
+      <!-- 选择区服弹窗 -->
+      <div class="popup_cent" style="display: block;">
+        <div class="popup_title" :class="'popup_title_' + activeLang.locale"><span>{{$t('chooseYourRole')}}</span></div>
+        <!-- <h4>{{$t('characterSelection')}}</h4> -->
+        <!-- 角色选择 -->
+        <div class="selectBox">
+          <div class="selectBtn" @click="showActorOption">
+            <p>{{$t(actorName)?`${$t(worldName)} ${$t(actorName)}`:$t('chooseYourRole')}}</p>
+            <span class="icon icon_2_1"></span>
+          </div>
+          <ul class="selectList" v-show="isShowActorList">
+            <li v-for="item in actorList" @click="pitchActor(item)">
+              {{item.worldName}}
+              {{item.actorName}}
+            </li>
+          </ul>
+        </div>
+        <div class="popup_btm">
+          <div class="popup_btn s_role_btn" @Click="onLoginToken()" :class="[actorId===''?'disabledBtn':'']">
+            <span>{{$t('confirm')}}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 积分不足提示框 -->
+      <div class="popup_cent" style="display:'block'">
+        <div class="popup_title"><span>{{$t('insufficientPoints')}}</span></div>
+        <h3>{{$t('youHaveInsufficientPoints')}}</h3>
+        <div class="popup_btm">
+          <div class="popup_btn" @click="onPoints('get_points_button')"><span>{{$t('getPoints')}}</span></div>
+        </div>
+      </div>
+
+      <!-- 兑换确认框 -->
+      <div class="popup_cent">
+        <div class="popup_title"><span>{{$t('confirmYourExchange')}}</span></div>
+        <div class="popup_info">
+          <h4> {{$t('characterInfo')}}</h4>
+          <p>{{selectedInfo.userName}} {{selectedInfo.actorName}}</p>
+          <h4>{{$t('exchangeInfo')}}</h4>
+          <p>{{exchangeInfo.name}} {{$t('pointsSpent')}}:{{countConsumePoints}}</p>
+          <div class="commodity_num">
+            <button @click="reduceNum">-</button>
+            <input v-model.number="commodityNum" @input="inputNum" oninput="value=value.replace(/[^\d]/g,'')" />
+            <button @click="increaseNum" :class="[!isPlusBtn?'disabledBtn':'']">+</button>
+          </div>
+        </div>
+        <div class="popup_btm">
+          <div :class="['popup_btn s_role_btn', disabled?'disabledBtn' : '' ]" @click="onTrade()">
+            <span>{{$t('confirm')}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 兑换成功框 -->
+      <div class="popup_cent">
+        <div class="popup_title"><span>{{$t('exchangeSuccessful')}}</span></div>
+        <h3>{{$t('gameReceiveReward')}}</h3>
+        <div class="popup_btm">
+          <div class="popup_btn" @click="isMask=isPopup=false"><span>{{$t('confirm')}}</span></div>
+        </div>
+      </div>
+
+      <!-- 退出弹窗 -->
+      <div class="popup_cent">
+        <div class="popup_title"><span>{{$t('logout')}}</span></div>
+        <h3>{{$t('confirmLout')}}</h3>
+        <div class="popup_btm logout_btm">
+          <div class="popup_btn" @click="onLogout"><span>{{$t('confirm')}}</span></div>
+          <div class="popup_btn" @click="isMask=isPopup=false"><span>{{$t('cancel')}}</span></div>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="popup_login_mask" v-show="isLoginMask"></div>
+    <!-- 登录弹窗 -->
+    <div class="popup_login" :class="loginStep===2?'popup_login_noBg':''" v-show="isPopupLogin">
+      <div class="popup_close" @click="closeLoginPopup();"></div>
+
+      <!-- 登录第一步：获取验证码和第三方登录方式 -->
+      <div class="popup_login_list" v-show="loginStep===0">
+        <div class="popup_login_top">
+          <div class="login_logo"><img src="images/logo.png" alt=""></div>
+          <!-- <div class="selectBox selectServer">
+            <div class="selectBtn" @click="showAreaOption">
+              <p>{{$t(activeName)?$t(activeName):$t('selectServer')}}</p>
+              <span class="icon icon_2_1"></span>
+            </div>
+            <ul class="selectList" v-show="isShowAreaOption">
+              <li v-for="item in areaData" @click="pitchArea(item)">
+                {{item.name}}
+              </li>
+            </ul>
+          </div> -->
+          <div class="popup_login_roleId">
+            <input v-model="actorId" @input="inputActor" class="actorInput" maxlength="11"
+              :placeholder="$t('characterID')" />
+            <div class="popup_login_roleId_btn">
+              <!-- <span @click="onDeleteRole()">{{$t('delete')}}</span> -->
+              <em @click="verifyingActor()">{{$t('verify')}}</em>
+            </div>
+          </div>
+          <div class="info_tips" v-show="isThroughVerify">roleName:{{actorName}}</div>
+          <!-- <div class="popup_verify_btn" @click="getVerify">获取验证码</div> -->
+          <div class="popup_verify_btn" :class="{disabledBtn:!isThroughVerify}" @click="getVerify(true)">
+            <span>{{$t('getCode')}}</span>
+          </div>
+        </div>
+        <div class="popup_login_external">
+          <div class="popup_login_external_title"><span></span>Third-party logins<span></span></div>
+          <ul>
+            <!--  <div :class="{ active: isActive, 'text-danger': hasError }"></div> -->
+            <li v-for="item in loginTypeList" :class="[item.type,{loginDisabled:item.isDisabled}]"
+              @click="onThinkingLoginType(item)">
+              <div :id="item.containerId"></div>
+              <!--  <img :src="item.img"> -->
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 登录第二步：输入验证码 -->
+      <div class="popup_login_list login_verify" v-show="loginStep===1">
+        <h3>{{$t('verificationSentMailbox')}}<span class="verify_rule" @click="onLoginGuide()"></span></h3>
+        <h2 v-html="$t('sendVerificationCodeToTheRole',{roleId: actorId,roleName: actorName})"></h2>
+        <h4 @click="onChangeCharacter()">{{$t('changeCharacter')}}</h4>
+        <div class="login_verify_input">
+          <input v-for="(item,index) in loginVerifyBox" :key="index" :ref="`ref${index}`" v-model="item.value"
+            oninput="value=value.replace(/[^\d]/g,'')" @input="onLoginVerify(index)" type="number"
+            @keyup.delete="onDeleteLoginVerify(index)" maxlength="1" />
+          <p v-show="isVerifyError">Verification code error or verification information has expired</p>
+          <div class="login_verify_time">
+            <div v-show="isLoginETime">{{$t('resendVerificationSecond',{s: loginEndTime})}}</div>
+            <div v-show="!isLoginETime" @click="getVerify(false)">{{$t('resend')}}</div>
+          </div>
+          <div class="popup_verify_btn" @click="onVerifyLogin()"><span>{{$t('login')}}</span></div>
+          <h5 @click="onExternal()">{{$t('thirdPartyLogin')}}</h5>
+        </div>
+      </div>
+
+      <!-- 登录第三步：验证码收取方式引导 -->
+      <div class="popup_login_list login_guide" v-show="loginStep===2">
+        <div class="login_guide_return" @click="loginStep=1"></div>
+        <h2><span>{{$t('getVerificationTips1')}}</span></h2>
+        <div class="guideScroll">
+          <p> {{$t('getVerificationTips2')}}</p>
+          <div class="login_guide_img">
+            <img src="images/loginGuideImg1.png" alt="">
+            <img src="images/loginGuideImg2.png" alt="">
+          </div>
+          <p> {{$t('getVerificationTips3')}}</p>
+          <div class="login_guide_img">
+            <img src="images/loginGuideImg3.png" alt="">
+          </div>
+        </div>
+        <div class="popup_ok_btn" @click="loginStep=1">ok</div>
+      </div>
+
+
+
+    </div>
+
+    <!-- 福利积分兑换奖励 -->
+    <!-- <div class="popup_rewards" v-show="isRewards">
+      <div class="popup_close" @click="isRewards=isMask=false"></div>
+      <div class="rewards_rule" @click="isRewards=false,isPopupRewardsRule=true"></div>
+      <div class="rewards_title">
+        <div class="rewards_title_left"></div>
+        <div class="rewards_title_cent">{{$t('redDiamond')}}</div>
+        <div class="rewards_title_right"></div>
+      </div>
+      <div class="red_recharged"> <span v-if="isLogin">{{selectedInfo.worldName}}
+          {{selectedInfo.actorName}}，</span>{{$t('redDiamondsRecharged')}}
+        <b v-if="isLogin">{{rewardPayNum}}</b><b @click="onLogin(),isRewards=false"
+          v-else>{{$t('pleaseLoginFirst')}}</b>
+
+        <div class="rewards_record" @click="onRewardsRecord()">
+          <div class="rewards_record_left"></div>
+          <div class="rewards_record_cent">{{$t('rewardCollectionRecord')}}</div>
+          <div class="rewards_record_right"></div>
+        </div>
+      </div>
+      <div class="deadline">{{$t('dataDeadline')}} <span>{{$t('rewardsTime')}}</span></div>
+
+      <div class="rewards_list">
+        <ul>
+          <li v-for="(item,index) in rewardsList" :key="index">
+            <div class="rewards_img"></div>
+            <div class="rewards_text">
+              <h2>{{item.rangeValue | rangeValueText}}</h2>
+              <p v-for="(itemList) in item.goodsInfos">{{itemList.goodsName}}*{{itemList.goodsNum}}</p>
+            </div>
+            <div :class="['rewards_btn',item.status!==0 ?'rewards_btn_no':'']">
+              <div class="rewards_btn_left"></div>
+              <div class="rewards_btn_cent" @click="onExchangeRewards(item)" v-if="item.status===0">
+                {{$t('rewardsAvailable')}}</div>
+              <div class="rewards_btn_cent" v-if="item.status==1" @click="rewardsPopup(2)">
+                {{$t('rewardsClaimed')}}</div>
+              <div class="rewards_btn_cent" v-if="item.status===2" @click="rewardsPopup(3)">{{$t('rewardsLocked')}}
+              </div>
+              <div class="rewards_btn_right"></div>
+            </div>
+          </li>
+
+        </ul>
+      </div>
+    </div> -->
+
+    <div class="popup_rewards_public popup" v-show="isPopupRewardsPublic">
+      <div class="popup_close" @click="isPopupRewardsPublic=false,isRewards = true"></div>
+      <!-- 兑换记录 -->
+      <div class="popup_rewards_cent">
+        <div class="popup_title"><span>{{$t('rewardCollectionRecord')}}</span></div>
+        <div class="popup_rewards_title">
+          <div>{{$t('rewardName')}}</div>
+          <div>{{$t('rewardTime')}}</div>
+        </div>
+        <div class="popup_rewards_list">
+          <ul>
+            <li v-for="item in rewardsRecordList" :key="item.id">
+              <div>
+                <p v-for="itemGoodsInfos in item.goodsInfos">{{itemGoodsInfos.goodsName}}*{{itemGoodsInfos.goodsNum}}
+                </p>
+              </div>
+              <div>{{item.createTime | utcTimeFormat}}</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- 领取成功 -->
+      <div class="popup_rewards_cent">
+        <div class="popup_title"><span>{{$t('rewardsClaimed')}}</span></div>
+        <div class="popup_rewards_tips">{{$t('gameReceiveReward')}}</div>
+      </div>
+
+      <!-- 已领取 -->
+      <div class="popup_rewards_cent">
+        <div class="popup_title"><span>{{$t('rewardsTips')}}</span></div>
+        <div class="popup_rewards_tips">{{$t('rewardsReceived')}}</div>
+      </div>
+
+      <!-- 未达到条件 -->
+      <div class="popup_rewards_cent">
+        <div class="popup_title"><span>{{$t('rewardsTips')}}</span></div>
+        <div class="popup_rewards_tips">{{$t('rewardsNocondition')}}</div>
+      </div>
+
+    </div>
+
+    <!-- 福利商品活动规则 -->
+    <!-- <div class="popup_rewards_rule" v-show="isPopupRewardsRule">
+      <div class="popup_title"><span>{{$t('eventRules')}}</span></div>
+      <div class="popup_close" @click="isPopupRewardsRule=false,isRewards = true"></div>
+      <div class="popup_rewards_rule_cent">
+        <p>{{$t('rewardsEentRulesList1')}}</p>
+        <p>{{$t('rewardsEentRulesList2')}}</p>
+        <p>{{$t('rewardsEentRulesList3')}}</p>
+        <p>{{$t('rewardsEentRulesList4')}}</p>
+        <p>{{$t('rewardsEentRulesList5')}}</p>
+        <p>{{$t('rewardsEentRulesList6')}}</p>
+        <p>{{$t('rewardsEentRulesList7')}}</p>
+      </div>
+    </div> -->
+
+    <!--  商品详情 -->
+    <div class="popup_rewards_detail" v-show="isPopupRewardDetail">
+      <div class="popup_rewards_detail_close" @click="isMask=isPopupRewardDetail=false,selectedCommodity={}"></div>
+      <div class="popup_title"><span>{{ selectedCommodity.name }}</span></div>
+      <div class="reward_detail_box">
+        <div class="reward_detail">
+          <div class="reward_detail_item" v-for="item in selectedCommodity.goodsInfos">
+            <img :src="item.goodsPic || getGeneratedRewardImage(item.goodsName, 'goods')"
+              @error="setFallbackImage($event,item.goodsName,'goods')" alt="">
+            <p>{{ item.goodsName }} * {{ item.goodsNum}}</p>
+            </img>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup_player_mask" v-show="isPlayerMask" @click="onPlayerMmask"></div>
+    <div class="video_wrapper" v-show="isPlayerMask"></div>
+
+
+  </div>
+  <script>
+    const navLang = navigator.language || navigator.userLanguage;
+    let baseLang = navLang.substring(0, 2).toUpperCase();
+    let lang = 'US'
+    let utc = 8
+    baseLang = navLang.toUpperCase() === 'ZH-TW' || navLang.toUpperCase() === 'ZH-CN' ? 'TW' : baseLang
+    let contentLanguage = navLang.replace(/-/g, "")
+    if (localStorage.getItem('lang') && localStorage.getItem('contentLanguage')) {
+      contentLanguage = localStorage.getItem('contentLanguage')
+      lang = localStorage.getItem('lang')
+    } else {
+      if (baseLang === 'US' || baseLang === 'DE' || baseLang === 'FR' || baseLang === 'ES' || baseLang === 'TH' || baseLang === 'IT' || baseLang === 'RU' || baseLang === 'TR' || baseLang === 'PL' || baseLang === 'PT' || baseLang === 'UK' || baseLang === 'RO') {
+        lang = baseLang
+        contentLanguage = navLang.replace(/-/g, "")
+      } else if (baseLang === 'zh-CN') {
+        lang = baseLang
+        contentLanguage = 'CN'
+      } else {
+        lang = "US"
+        contentLanguage = 'enUS'
+      }
+      localStorage.setItem('lang', lang)
+      localStorage.setItem('contentLanguage', contentLanguage)
+    }
+    Vue.use(VueI18n)
+    var i18n = new VueI18n({
+      locale: lang,
+      messages: messages,
+    })
+    var countDown = Vue.extend({
+      props: {
+        id: {
+          type: Number,
+          default: 0
+        },
+        publishtime: {
+          type: Number,
+          default: 0
+        },
+        currenttime: {
+          type: Number,
+          default: 0
+        },
+      },
+      template: `<span>
+        <slot v-cloak>{{time}}</slot></span>`,
+      data: function () {
+        return {
+          timer: null,
+          time: '',
+          s: 0,
+          oldpDate: 0
+        }
+      },
+      watch: {
+        publishtime: function () {
+          this.s = 0
+          clearInterval(this.timer);
+          this.countdowm(this.publishtime, this.currenttime)
+        },
+      },
+      mounted: function () {
+        this.countdowm(this.publishtime, this.currenttime)
+      },
+      methods: {
+        countdowm (timestamp, currentTime) {
+          var self = this
+          this.timer = setInterval(function () {
+            if (self.s === 0) {
+              self.time = ''
+              self.s = currentTime
+            }
+            self.s = self.s + 1000;
+            var nowTime = new Date(self.s)
+            var endTime = new Date(timestamp)
+            var t = endTime.getTime() - nowTime.getTime()
+            if (t > 0) {
+              var day = Math.floor(t / 86400000)
+              var hour = Math.floor((t / 3600000) % 24)
+              var min = Math.floor((t / 60000) % 60)
+              var sec = Math.floor((t / 1000) % 60)
+              day = day < 10 ? "0" + day : day
+              hour = hour < 10 ? "0" + hour : hour
+              min = min < 10 ? "0" + min : min
+              sec = sec < 10 ? "0" + sec : sec
+              var format = day > 0 ? day + ':' + hour + ':' + min + ':' + sec : hour + ':' + min + ':' + sec
+              self.time = format
+            } else {
+              clearInterval(self.timer)
+              self.time = ''
+              self.$emit('countends', self.id)
+            }
+          }, 1000);
+        }
+      },
+      beforeDestroy: function () {
+        clearInterval(this.timer);
+      }
+    });
+    Vue.component('countdown', countDown)
+    var vue = new Vue({
+      el: '#app',
+      i18n: i18n,
+      data: {
+        s: 120,
+        isContainerList: 0,
+        isGetSms: false,
+        verifyCode: '', //验证码
+        showVeriCodeLogin: false,
+        isShowOption: false, //是否显示语言下拉框
+        isShowAreaOption: false, //是否显示大区下拉框
+        isShowActorList: false, //是否显示角色下拉框
+        activeName: '', //选择大区名称
+        actorName: '', //角色名称
+        worldName: '', //世界名
+        actorId: '', //角色ID
+        isMask: false,//是否显示弹窗遮罩层
+        isLoginMask: false,//是否显示弹窗遮罩层
+        isPlayerMask: false,//是否显示弹窗遮罩层
+        isPopup: false,//是否显示弹窗
+        isPopupRule: false,//是否显示规则弹窗
+        isVipPopupRule: false,// 是否显示会员中心的规则弹窗
+        isReward: true, //是否显示商品列表
+        isRecord: false, // 是否显示兑换记录
+        isLogin: false, // 是否登录
+        isAllCommodity: true, // 是否显示全部商品列表
+        isPopupLogin: false, // 是否显示sdk登录弹窗
+        gameVersion: '', //游戏版本
+        gameAreaName: '', //游戏大区
+        points: '', //消耗积分
+        consumePoints: 0, //兑换商品消耗积分
+        countConsumePoints: 0, //计算积分
+        isPlusBtn: true, //加号是否可以点击
+        isSelectActorId: true, //是否选择角色
+        loginType: '', //登录类型
+        isPageCent: false, //是否显示登录主体内容
+        isClickLoginType: false, //是否点击过选择类型
+        disabled: false,
+        isOs: false, //是否显示系统
+        isRewards: false, //是否显示系统
+        jsonCode: 1001,
+        langArr: [{ id: 1, language: 'English', locale: 'US', contentLanguage: 'enUS', sdkLangCode: 'en', UTC: 0 },
+        { id: 2, language: 'Deutsch', locale: 'DE', contentLanguage: 'deDE', sdkLangCode: 'de', UTC: 0 },
+        { id: 3, language: 'Français', locale: 'FR', contentLanguage: 'frFR', sdkLangCode: 'f', UTC: 0 },
+        { id: 4, language: 'Español', locale: 'ES', contentLanguage: 'esES', sdkLangCode: 'es', UTC: 0 },
+        { id: 5, language: 'Italian', locale: 'IT', contentLanguage: 'itIT', sdkLangCode: 'it', UTC: 0 },
+        { id: 7, language: 'ภาษาไทย', locale: 'TH', contentLanguage: 'thTH', sdkLangCode: 'th', UTC: 0 },
+        { id: 8, language: 'Русский', locale: 'RU', contentLanguage: 'ruRU', sdkLangCode: 'ru', UTC: 0 },
+        { id: 9, language: 'Türkçe', locale: 'TR', contentLanguage: 'trTR', sdkLangCode: 'tr', UTC: 0 },
+        { id: 10, language: 'Polski', locale: 'PL', contentLanguage: 'plPL', sdkLangCode: 'pl', UTC: 0 },
+        { id: 11, language: 'Português', locale: 'PT', contentLanguage: 'ptPT', sdkLangCode: 'pt', UTC: 0 },
+        { id: 12, language: 'українська', locale: 'UK', contentLanguage: 'uaUA', sdkLangCode: 'ua', UTC: 0 },
+        { id: 13, language: 'română', locale: 'RO', contentLanguage: 'roRO', sdkLangCode: 'ro', UTC: 0 },
+
+        ],
+        activeLang: { id: 1, language: 'English', locale: 'US', sdkLangCode: 'en', UTC: 0 },
+        areaData: areaData,
+        actorList: [], //角色列表
+        selectedInfo: {}, // 选中角色信息
+        commodityListData: [], //可兑换商品列表
+        allCommodityList: [], //全部商品列表
+        approveCommodityList: [], //可兑换商品列表
+        exchangeInfo: {}, //选择兑换商品信息
+        exchangeRecordsData: [],//兑换记录
+        commodityNum: 1,//兑换商品数量
+        packageData: [], //可选择渠道配置
+        actorInput: '',//登录角色输入
+        loginTypeList: [
+          { type: "FB", isDisabled: true, containerId: '0', appleRedirectURI: '' },
+          { type: "Google", isDisabled: true, containerId: '0', appleRedirectURI: '' },
+          { type: "Apple", isDisabled: true, containerId: '0', appleRedirectURI: appleRedirectURI }
+        ],//登录方式列表
+        rewardsList: [],//福利商品列表
+        rewardsRecordList: [],//领取福利商品记录列表
+        rewardSendTime: 1707033540,//福利商品-兑换截止时间
+        rewardPayNum: 0,//福利商品-累计充值红钻数
+        isPopupRewardsPublic: false,//福利商品-累计充值红钻数
+        isPopupRewardsRule: false,//福利商品-规则
+        isLoginTypeList: false,//福利商品-规则
+        selectedCommodity: {}, // 当前点击查看详情的商品
+        isPopupRewardDetail: false,
+        showLoginTip: false,
+        showRoleMsg: false,
+        loginAlertText: '请输入您的角色ID',
+        verfyActorName: '',
+        verfyWorldName: '',//登录世界名
+        isThrottled: false, //节流
+        europeAmericaCode: [
+          'AL', 'IE', 'EE', 'AT', 'BY', 'BG', 'MK', 'BE', 'IS', 'PL', 'DK', 'DE', 'FR', 'FI',
+          'NL', 'ME', 'CZ', 'HR', 'LV', 'LT', 'LU', 'RO', 'MT', 'MD', 'NO', 'PT', 'SE', 'CH',
+          'RS', 'CY', 'SK', 'SI', 'TR', 'UA', 'ES', 'GR', 'HU', 'IT', 'GB',
+          'US', 'BR', 'CA', 'AR', 'AI', 'AG', 'BB', 'BS', 'PY', 'PA', 'BM',
+          'PE', 'BO', 'BZ', 'DO', 'DM', 'EC', 'CO', 'CR', 'GD', 'GY', 'HN',
+          'KY', 'MS', 'MX', 'NI', 'SV', 'KN', 'LC', 'VC', 'SR', 'TC', 'TT',
+          'GT', 'VE', 'UY', 'JM', 'VG', 'CL'
+        ],
+        countryCode: 'US', // 定位国家代码
+        loginStep: 0,
+        loginVerifyBox: [
+          { value: '' },
+          { value: '' },
+          { value: '' },
+          { value: '' },
+          { value: '' },
+          { value: '' }
+        ],
+        loginVerifyVal: '', //登录验证码
+        loginEndTime: 59, //登录验证码倒计时
+        loginTimer: null,  //登录定时器
+        isLoginETime: false, //是否显示倒计时
+        isThroughVerify: false, //角色是否通过验证
+        isVerifyError: false, //角色是否通过验证
+        loginPopupDuration: 0, //登录弹窗停留时间
+        loginPopupVerifyDuration: 0, //登录弹窗验证码停留时间
+        isRecordPopup: false,// 记录弹窗
+        isIntegral: true,
+        isEmpirical: false,
+        recordActiveStyle: {
+          color: '#e7512c',
+          borderBottom: '1px solid #e7512c'
+        },
+        recordInitStyle: {
+          color: '#672703',
+          borderBottom: 'none'
+        },
+        vipExpRecordData: [], //会员经验明细
+        isRecordScroll: true, //会员经验值是否可以滚动
+        vipRecordLastId: 0, //会员经验值lastId
+        vipPointsRecordData: [], // 积分记录明细
+        isPointsScroll: true, // 积分记录是否可以滚动
+        vipPointsRecordLastId: 0, //积分记录经验值lastId
+        changeWayEnum: {
+          1: { type: 'add', field: 'recharge' },
+          2: { type: 'add', field: 'bonusPoints' },
+          3: { type: 'del', field: 'deductionOfPoints' },
+          4: { type: 'del', field: 'shoppingMallExchange' },
+          5: { type: 'del', field: 'activityLuckyDraw' },
+          6: { type: 'add', field: 'giftOfPrivilege' },
+        }
+      },
+      created () {
+        for (var i = 0; i < this.langArr.length; i++) {
+          if (this.langArr[i].locale === lang) {
+            this.activeLang = this.langArr[i]
+            i18n.locale = this.langArr[i].locale
+            return
+          } else {
+            this.activeLang = this.langArr[0]
+            i18n.locale = this.langArr[0].locale
+          }
+        }
+
+      },
+      filters: {
+        utcTimeFormat (value) {
+          let date = new Date(value + utc * 3600 * 1000);
+          return date.toJSON().substr(0, 19).replace('T', ' ');
+
+        },
+        rangeValueText (value) {
+          return vue.$t(`rewardsRangeValue${value}`)
+        }
+      },
+      watch: {
+        actorId: function (newValue) {
+          this.actorId = newValue
+        },
+        /* isMask: function (newValue) {
+          if (isMobile) {
+            if (newValue) {
+              $("body,html").addClass('noscroll')
+            } else {
+              $("body,html").removeClass('noscroll')
+            }
+          }
+        }, */
+        isLoginMask: function (newValue) {
+          if (isMobile) {
+            if (newValue) {
+              $("body,html").addClass('noscroll')
+            } else {
+              $("body,html").removeClass('noscroll')
+            }
+          }
+        },
+
+      },
+      computed: {
+        verifyDisabled: function () {
+          return !(this.actorId && this.activeName && this.verifyCode && this.verfyActorName)
+        },
+      },
+      async mounted () {
+        const _this = this
+        if (this.getQueryString('tab') === "vip") {
+          this.noTopTab(1)
+        }
+        this.$toast.setDefaultOptions({ duration: 2000 });
+        thinking.init({
+          appId: thinkingAppId,
+          serverUrl: 'https://data.q1.com',
+          gameId: gameId, //游戏gameId
+          showLog: false, // 是否开启打印上报信息，默认false
+          // mode: 'debug_only' //数据模式,线上环境使用normal模式 || 删除该参数(debug_only:数据不入库)
+        })
+
+        this.pitchArea(this.areaData[0])
+        if (loginToken) {
+          this.$toast.loading({
+            duration: 0, // 持续展示 toast
+            forbidClick: true,
+            closeOnClick: true,
+            loadingType: 'spinner',
+          });
+          getActorList(res => {
+            if (res.data === null) {
+              this.onLogout()
+              this.$toast.clear()
+              return
+            }
+            this.actorList = res.data.actors
+            this.actorId = res.data.defaultActorId
+            this.init()
+          })
+
+        } else {
+          this.$toast.loading({
+            duration: 0, // 持续展示 toast
+            forbidClick: true,
+            closeOnClick: true,
+            loadingType: 'spinner',
+          });
+          this.touristChangeLang()
+          thinking.track('visit_page')
+        }
+      },
+      methods: {
+        getGeneratedRewardImage,
+        setFallbackImage,
+        getQueryString (name) {
+          try {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return decodeURIComponent(r[2]); return "";
+          }
+          catch (e) { return "" }
+        },
+        onKnapsack () {
+          this.$refs.vipComp.onKnapsack()
+        },
+        changeMask (type) {
+          this.isMask = type
+        },
+        // 切换积分/经验值
+        recordSwitch (type) {
+          if (type == 0) {
+            this.isIntegral = true;
+            this.isEmpirical = false
+          } else {
+            this.isIntegral = false;
+            this.isEmpirical = true;
+          }
+        },
+        noTopTab (num) {
+          $('.select_tab span').removeClass('on').eq(num).addClass('on')
+          this.isContainerList = num
+        },
+        touristChangeLang () {
+          getProductTourist(this.areaData[0].gameVersion, (res => {
+            this.allCommodityList = this.commodityListData = this.approveCommodityList = res.data
+            this.$nextTick(() => {
+              this.$toast.clear()
+            })
+          }))
+          this.$refs.vipComp.touristChangeLang();
+        },
+        // 获取验证码引导
+        onLoginGuide () {
+          this.loginStep = 2
+          thinking.track('click_login_tips', {
+            roleId: this.actorId
+          })
+        },
+        // 跳转第三方登录
+        onExternal () {
+          this.loginStep = 0
+          this.onDeleteLoginVerify(0)
+          thinking.track('verify_popup_duration', {
+            popup_duration: Number((new Date().getTime() / 1000).toFixed(0)) - this.loginPopupVerifyDuration,
+            roleId: this.actorId
+          })
+          thinking.track('click_external_login', {
+            roleId: this.actorId
+          })
+
+        },
+        // 点击上报第三方登录方式
+        onThinkingLoginType (e) {
+          thinking.track(`click_login_${e.type}`)
+        },
+        // 获取验证码
+        getVerify (e) {
+          if (e && !this.isThroughVerify) {
+            this.$toast.fail(this.$t(`returnTips4002`))
+            return
+          }
+          if (!e) {
+            thinking.track('click_resend_verify', {
+              roleId: this.actorId
+            })
+          }
+          this.$toast.loading({
+            duration: 0, // 持续展示 toast
+            forbidClick: true,
+            closeOnClick: true,
+            loadingType: 'spinner',
+          });
+          this.isThroughVerify = false
+          this.isVerifyError = false
+          getSmsCode({
+            gameId: gameId,
+            gameVersion: this.gameVersion,
+            roleid: this.actorId,
+            fingerprintId: fingerprintId
+          }, res => {
+            if (e) {
+              thinking.track('obtain_login_verify', {
+                state: 'success'
+              })
+              this.loginPopupVerifyDuration = Number((new Date().getTime() / 1000).toFixed(0))
+            }
+            this.isLoginETime = true
+            this.loginEndTime = 59
+            clearInterval(this.loginTimer)
+            this.loginTimer = setInterval(() => {
+              this.loginEndTime--
+              if (this.loginEndTime <= 0) {
+                clearInterval(this.loginTimer)
+                this.isLoginETime = false
+                this.isThroughVerify = true
+              }
+            }, 1000)
+            this.loginStep = 1
+            this.$toast.clear()
+          })
+        },
+        // 输入登录验证码
+        onLoginVerify (index) {
+          // index < 5 ，如果是第6格，不触发光标移动至下一个输入框。
+          if (this.loginVerifyBox[index].value && index < 5) {
+            this.$refs['ref' + (index + 1)][0].focus()
+          }
+          var inputValue = ''
+          this.loginVerifyBox.forEach(item => {
+            inputValue = inputValue + item.value
+          })
+          this.loginVerifyVal = inputValue
+        },
+        // 删除登录验证码
+        onDeleteLoginVerify (index) {
+          // 如果是第1格，不触发光标移动至上一个输入框
+          if (index > 0) {
+            this.$refs['ref' + (index - 1)][0].focus()
+          } else {
+            this.loginVerifyBox.forEach(item => {
+              item.value = ''
+            })
+          }
+        },
+
+        // 验证码登陆
+        onVerifyLogin () {
+          let isVerifyEmpty = this.loginVerifyBox.every(item => {
+            return item.value !== ''
+          })
+          if (!isVerifyEmpty) return
+          const data = {
+            gameId: gameId,
+            gameVersion: this.gameVersion,
+            roleId: this.actorId,
+            fingerprintId: fingerprintId,
+            code: md5(encodeURIComponent(this.loginVerifyVal + codeSecretKey))
+          }
+          verifyCodeLogin(data, res => {
+            localStorage.setItem('loginAccessToken', res.data.accessToken);
+            loginToken = res.data.accessToken
+            this.isLogin = this.isMask = this.isPopup = false
+            thinking.setPageProperty({ roleName: this.actorName })
+            thinking.track('verification_code_verification', {
+              verification_code: this.verifyCode,
+              state: "success"
+            })
+            getActorList(res => {
+              this.actorList = res.data.actors
+              if (res.data.defaultActorId !== null) {
+                this.actorId = res.data.defaultActorId
+              }
+              this.init('init')
+            })
+
+
+          })
+        },
+        // 更换角色
+        onChangeCharacter () {
+          this.loginStep = 0
+          this.onDeleteLoginVerify(0)
+          thinking.track('click_login_for_other_roles_button', {
+            roleId: this.actorId,
+            roleName: this.actorName,
+          })
+        },
+        sendLoginCode () {
+          if (this.gameVersion === '') {
+            this.$toast.fail(this.$t('selectServer'))
+            return
+          }
+          if (this.actorId === '') {
+            this.showLoginTip = true
+            this.loginAlertText = this.$t('characterID')
+            return
+          }
+          setTimeout(() => {
+            if (this.showLoginTip) return
+            const data = {
+              gameId: gameId,
+              gameVersion: this.gameVersion,
+              roleId: this.actorId,
+              fingerprintId: fingerprintId
+            }
+            if (!this.isThrottled) {
+              this.isThrottled = true;
+              setTimeout(() => vue.isThrottled = false, 3000);
+              getVerificationCode(data, (res) => {
+                this.updateCodeTime()
+              })
+            }
+          }, 500)
+        },
+        handleVerifyLogin () {
+          const data = {
+            gameId: gameId,
+            gameVersion: this.gameVersion,
+            roleId: this.actorId,
+            fingerprintId: fingerprintId,
+            code: md5(encodeURIComponent(this.verifyCode + codeSecretKey))
+          }
+          if (!this.isThrottled) {
+            this.isThrottled = true;
+            setTimeout(() => vue.isThrottled = false, 3000);
+            this.$toast.loading({
+              duration: 0, // 持续展示 toast
+              forbidClick: true,
+              closeOnClick: true,
+              loadingType: 'spinner',
+            });
+            verifyCodeLogin(data, (res) => {
+              localStorage.setItem('loginAccessToken', res.data.accessToken);
+              loginToken = res.data.accessToken
+              getActorList(res => {
+                vue.actorList = res.data.actors
+                if (res.data.defaultActorId !== null) {
+                  vue.actorId = res.data.defaultActorId
+                }
+                vue.init('init')
+              })
+            })
+          }
+        },
+        updateCodeTime () {
+          this.isGetSms = true
+          try {
+            var intervalId = setInterval(function () {
+              if (!vue.s) {
+                clearInterval(intervalId)
+                vue.s = 120
+                vue.isGetSms = false
+                return
+              }
+              vue.s--
+            }, 1000);
+          } catch (error) {
+            console.log(error)
+          }
+        },
+        countends (id) {
+          $('#time' + id + '-btn').removeClass('non-exc').addClass('exc-btn')
+          $('#time' + id + '-btn').attr("disabled", false);
+        },
+        init (name) {
+          getActorDetails(this.actorId, (detailsRes => {
+            if (detailsRes.data === null) {
+              //   logout()
+              this.$toast.clear()
+              return
+            }
+            // 重置滚动加载数据  注：v-show 那里要写key，否则vue for循环生成的dom会缓存，导致看上去重置失败
+            $('.empirical_box ul').off('scroll');
+            $('.integral_box ul').off('scroll');
+            $('.empirical_box ul').scrollTop(0);
+            $('.integral_box ul').scrollTop(0);
+            this.vipPointsRecordLastId = this.vipRecordLastId = 0;
+            this.isPointsScroll = this.isRecordScroll = true;
+            this.vipPointsRecordData = this.vipExpRecordData = [];
+
+            this.selectedInfo = detailsRes.data
+            this.isLogin = true
+            this.isPopupLogin = this.isLoginMask = this.isPopup = false
+            let gameVersionData = this.areaData.filter(item => {
+              return item.gameVersion === this.selectedInfo.gameVersion
+            })
+            this.gameVersion = gameVersionData[0].gameVersion
+
+            this.gameAreaName = gameVersionData[0].name
+            const userParams = {
+              userId: this.selectedInfo.userId,
+              roleName: this.selectedInfo.actorName,// 其他事件也算传了 roleName roleId
+              roleId: this.selectedInfo.actorId,
+              serverId: this.selectedInfo.worldId,
+              userName: this.selectedInfo.userName,
+            }
+            if (name === 'init') {
+              thinking.track('account_login_suc', {
+                ...userParams
+              })
+            }
+            thinking.track('visit_page', {
+              ...userParams
+            })
+
+            getProduct({ actorId: this.selectedInfo.actorId, worldId: this.selectedInfo.worldId }, productRes => {
+              this.allCommodityList = this.commodityListData = productRes.data
+              this.approveCommodityList = this.allCommodityList?.filter(item => {
+                return item.points <= this.selectedInfo.points && item.cycleTrade
+              })
+              this.$nextTick(() => {
+                this.$toast.clear()
+              })
+              $('.list_top div').removeClass('on').eq(0).addClass('on')
+
+            })
+            this.$nextTick(() => {
+              this.$refs.vipComp.init();
+            });
+
+            getExpRecord({ actorId: this.selectedInfo.actorId, worldId: this.selectedInfo.worldId, lastId: this.vipRecordLastId, pageSize: 10 }, res => {
+              this.vipExpRecordData = res.data
+              if (res.data.length < 10) return
+              this.vipRecordLastId = res.data[res.data.length - 1].id
+              $('.empirical_box ul').scroll(debounce(event => {
+                var scrollTop = event.currentTarget.scrollTop;
+                var scrollHeight = event.currentTarget.scrollHeight;
+                var clientHeight = event.currentTarget.clientHeight;
+                if (scrollTop + clientHeight >= scrollHeight - 10) {
+                  if (!this.isRecordScroll) return
+                  getExpRecord({ actorId: this.selectedInfo.actorId, worldId: this.selectedInfo.worldId, lastId: this.vipRecordLastId, pageSize: 20 }, resPage => {
+                    this.vipExpRecordData.push(...resPage.data)
+                    if (resPage.data.length < 20) {
+                      this.isRecordScroll = false
+                      return
+                    }
+                    this.vipRecordLastId = resPage.data[resPage.data.length - 1].id
+                  })
+                }
+              }, 200))
+            })
+
+            getPointsRecord({ actorId: this.selectedInfo.actorId, worldId: this.selectedInfo.worldId, lastId: this.vipPointsRecordLastId, pageSize: 10 }, res => {
+              this.vipPointsRecordData = res.data
+              if (res.data.length < 10) return
+              this.vipPointsRecordLastId = res.data[res.data.length - 1].id
+              $('.integral_box ul').on('scroll', debounce(event => {
+                var scrollTop = event.currentTarget.scrollTop;
+                var scrollHeight = event.currentTarget.scrollHeight;
+                var clientHeight = event.currentTarget.clientHeight;
+                if (scrollTop + clientHeight >= scrollHeight - 10) {
+                  if (!this.isPointsScroll) return
+                  getPointsRecord({ actorId: this.selectedInfo.actorId, worldId: this.selectedInfo.worldId, lastId: this.vipPointsRecordLastId, pageSize: 20 }, resPage => {
+                    this.vipPointsRecordData.push(...resPage.data)
+                    if (resPage.data.length < 20) {
+                      this.isPointsScroll = false
+                      return
+                    }
+                    this.vipPointsRecordLastId = resPage.data[resPage.data.length - 1].id
+                  })
+                }
+              }, 200))
+            })
+
+            getExtendToken(this.selectedInfo.userId, json => {
+              localStorage.setItem('loginAccessToken', json.data.accessToken);
+              loginToken = json.data.accessToken
+            })
+
+            this.$refs.vipComp.vipKnapsackData = []
+
+          }))
+        },
+        // 登录弹窗
+        onLogin () {
+          this.loginPopupDuration = Number((new Date().getTime() / 1000).toFixed(0))
+          thinking.track('click_the_login_button', {
+            click_button_time: this.loginPopupDuration
+          })
+          if (!loginToken || !this.isLogin) {
+            if (urlRequest('actorId')) {
+              this.actorId = urlRequest('actorId')
+              this.isPopupLogin = this.isLoginMask = true
+              setTimeout(() => {
+                this.verifyingActor()
+              }, 200)
+            } else {
+              this.isPopupLogin = this.isLoginMask = true
+            }
+          } else {
+            this.popup(0)
+          }
+        },
+        returnLogin () {
+          if (urlRequest('gameVersion') && urlRequest('actorId')) {
+            this.removeQueryParams()
+          }
+          this.isPageCent = this.isLoginTypeList = false
+        },
+        removeQueryParams () {
+          window.history.replaceState({}, document.title, location.pathname);
+        },
+        // 积分与经验值记录弹窗
+        recordPopup (type) {
+          this.isRecordPopup = this.isMask = true;
+          this.recordSwitch(type)
+        },
+        // 弹窗
+        popup (num) {
+          this.isPopup = this.isMask = true
+          $('.popup .popup_cent').hide().eq(num).show()
+        },
+        // 选择商品
+        onRreward (num) {
+          if (!this.isLogin) {
+            this.onLogin()
+            return false
+          }
+          $('.list_top div').removeClass('on').eq(num).addClass('on')
+          this.commodityListData = num === 0 ? this.allCommodityList : this.approveCommodityList
+        },
+        // 语言切换
+        changeLang (item) {
+          this.activeLang = item
+          this.isShowOption = false
+          utc = item.UTC
+          i18n.locale = item.locale
+          contentLanguage = item.contentLanguage
+          localStorage.setItem('lang', item.locale)
+          localStorage.setItem('contentLanguage', item.contentLanguage)
+          this.$toast.loading({
+            duration: 0, // 持续展示 toast
+            forbidClick: true,
+            closeOnClick: true,
+            loadingType: 'spinner',
+          });
+          if (loginToken) {
+            this.init()
+          } else {
+            this.touristChangeLang()
+          }
+        },
+        // 点击大区显示下拉框
+        showAreaOption () {
+          this.isShowAreaOption = !this.isShowAreaOption
+          this.isShowActorList = false
+        },
+        // 点击角色显示下拉框
+        showActorOption () {
+          this.isShowActorList = !this.isShowActorList
+          this.isShowAreaOption = false
+        },
+
+        // 选中大区
+        pitchArea (item) {
+          const _this = this
+          this.isShowAreaOption = false
+          // apiDomain = `${protocol}//${item.url}`
+          this.gameVersion = item.gameVersion
+          this.activeName = item.name
+        },
+        // 输入角色
+        inputActor (e) {
+          this.actorId = this.actorId.replace(/[^\d]/g, '')
+        },
+        inputVerifyCode (e) {
+          this.verifyCode = this.verifyCode.replace(/[^\d]/g, '')
+        },
+        // 选中角色
+        pitchActor (item) {
+          this.isShowActorList = false
+          this.actorId = item.actorId
+          this.actorName = item.actorName
+          this.worldName = item.worldName || item.worldId
+        },
+        // 角色验证
+        verifyingActor () {
+          thinking.setPageProperty({ roleId: this.actorId })
+          thinking.setPageProperty({ roleName: '' })
+          const _this = this
+          if (this.gameVersion === '') {
+            this.$toast.fail(this.$t('selectServer'));
+            return
+          }
+          if (this.actorId === '') {
+            this.$toast.fail(this.$t('characterID'));
+            return
+          }
+          this.$toast.loading({
+            duration: 0, // 持续展示 toast
+            forbidClick: true,
+            closeOnClick: true,
+            loadingType: 'spinner',
+          });
+
+          const data = {
+            gameId: gameId,
+            gameVersion: this.gameVersion,
+            roleid: this.actorId,
+            timestamp: new Date().getTime(),
+            appId: gameId,
+          }
+          this.loginTypeList.forEach(item => {
+            item.isDisabled = true
+          })
+          getConfigCenter(data, res => {
+            thinking.track('role_verification', {
+              state: 'success'
+            })
+            localStorage.setItem('integralGameVersion', this.gameVersion)
+            localStorage.setItem('integralActorId', this.actorId)
+            this.actorName = res.data.actorInfo.roleName
+            this.$toast.clear()
+            this.isThroughVerify = true
+            this.isPageCent = this.isLoginTypeList = this.isPopupLogin = this.isLoginMask = true
+            var configData = []
+            this.loginTypeList.forEach((e, eIndex) => {
+              e.containerId = '0'
+              e.isDisabled = true
+              res.data.configurations.forEach((item, index) => {
+                if (item.loginType === e.type) {
+                  e.containerId = `method${eIndex}`
+                  e.isDisabled = false
+                  let configObj = {}
+                  configObj.type = item.loginType
+                  configObj.clientId = item.developerInfo
+                  configObj.containerId = `method${eIndex}`
+                  configObj.pId = item.pid
+                  if (item.loginType === "Apple") {
+                    configObj.appleRedirectURI = appleRedirectURI
+                  }
+                  configData.push(configObj)
+                }
+              })
+            })
+            setTimeout(function () {
+              H5LoginSdk.login({
+                environment: environment, //环境
+                appId: 2060, //游戏ID
+                appKey: appKey,
+                loginType: configData,
+                langCode: _this.activeLang.sdkLangCode,
+                success (res) {
+                  // localStorage.setItem('sdkAccessToken', sdkAccessToken);
+                  sdkToken = res.token
+                  _this.$toast.clear()
+                  getLoginToken(_this.gameVersion, _this.actorId, (res => {
+                    localStorage.setItem('loginAccessToken', res.data.accessToken);
+
+                    loginToken = res.data.accessToken
+                    //  _this.isLogin = _this.isMask = _this.isPopup = _this.isPopupLogin = false
+                    getActorList(res => {
+                      _this.actorList = res.data.actors
+                      if (res.data.defaultActorId !== null) {
+                        _this.actorId = res.data.defaultActorId
+                      }
+
+                      _this.init('init')
+                      thinking.track('login_popup_duration', {
+                        login_popup_duration: Number((new Date().getTime() / 1000).toFixed(0)) - this.loginPopupDuration
+                      })
+                    })
+                  }))
+
+                },
+                fail (res) {
+                  _this.$toast.clear()
+                  if (res.code === 1001) {
+                    _this.$toast.fail(_this.$t('binAccountTips'));
+                  } else if (res.code === 1004) {
+                    _this.$toast.fail(_this.$t('pleaseChooseAgain'));
+                  }
+                }
+              })
+            }, 200)
+          })
+        },
+        onDeleteRole () {
+          this.actorId = ''
+          this.isThroughVerify = false
+          this.loginTypeList.forEach(item => {
+            item.isDisabled = true
+          })
+        },
+        closeLoginPopup () {
+          if (urlRequest('gameVersion') && urlRequest('actorId')) {
+            this.removeQueryParams()
+          }
+          this.isLoginMask = this.isMask = this.isPopupLogin = this.isPageCent = this.isLoginTypeList = false
+          this.actorId = this.verifyCode = ''
+          this.showLoginTip = this.showRoleMsg = false
+          thinking.track('login_popup_duration', {
+            login_popup_duration: Number((new Date().getTime() / 1000).toFixed(0)) - this.loginPopupDuration
+          })
+        },
+        /**
+          * 登录token
+          */
+        onLoginToken () {
+          if (this.gameVersion === '' || this.actorId === '') {
+            return false
+          }
+          this.init()
+          this.isLogin = this.isMask = this.isPopup = false
+        },
+        // 兑换商品确认弹窗
+        onTradePopup (item) {
+          if (!this.isLogin) {
+            this.onLogin()
+            if (!isMobile) {
+              // $('.popup_login').css('top', document.documentElement.scrollTop + 50)
+            }
+            return false
+          }
+          if (this.selectedInfo.points < item.points) {
+            this.popup(1)
+            return false
+          }
+          this.exchangeInfo = item
+          this.consumePoints = this.countConsumePoints = item.points
+          this.popup(2)
+        },
+        reduceNum () {
+          if (this.commodityNum > 1) {
+            this.commodityNum--
+            this.countConsumePoints = this.consumePoints * this.commodityNum
+            this.isPlusBtn = true
+          }
+        },
+        increaseNum () {
+          if (this.selectedInfo.points !== 0 && this.exchangeInfo.points * (Number(this.commodityNum) + 1) >= this.selectedInfo.points) {
+            this.commodityNum = Math.floor(this.selectedInfo.points / this.exchangeInfo.points)
+            this.isPlusBtn = false
+            return false
+          }
+          if (this.exchangeInfo.unlimitedStock === 0 && (this.commodityNum >= this.exchangeInfo.tradeCount || this.commodityNum >= this.exchangeInfo.surplusStock) && this.exchangeInfo.limitTrade !== 0) {
+            this.isPlusBtn = false
+            return false
+          }
+          if (this.commodityNum >= 99) {
+            this.commodityNum = 99
+            this.countConsumePoints = this.consumePoints * this.commodityNum
+            this.isPlusBtn = false
+            return false
+          }
+          this.commodityNum++
+          this.countConsumePoints = this.consumePoints * this.commodityNum
+          this.isPlusBtn = true
+        },
+        inputNum (e) {
+          var num = Number(e.target.value.replace(/[^\d]/g, ''))
+          if (num === 0) {
+            this.commodityNum = 1
+            this.countConsumePoints = this.consumePoints * this.commodityNum
+            return false
+          }
+          if (this.exchangeInfo.unlimitedStock === 0 && (this.commodityNum >= this.exchangeInfo.tradeCount || this.commodityNum >= this.exchangeInfo.surplusStock) && this.exchangeInfo.limitTrade !== 0) {
+            this.isPlusBtn = false
+            this.commodityNum = this.exchangeInfo.tradeCount
+            this.countConsumePoints = this.consumePoints * this.commodityNum
+            return false
+          }
+          if (num >= 99) {
+            this.commodityNum = 99
+            this.countConsumePoints = this.consumePoints * this.commodityNum
+            this.isPlusBtn = false
+            return false
+          }
+          if (this.selectedInfo.points !== 0 && this.exchangeInfo.points * num >= this.selectedInfo.points) {
+            this.commodityNum = Math.floor(this.selectedInfo.points / this.exchangeInfo.points)
+            this.countConsumePoints = this.consumePoints * this.commodityNum
+            return false
+          }
+
+          this.isPlusBtn = true
+          this.countConsumePoints = this.consumePoints * this.commodityNum
+        },
+
+        // 兑换商品
+        onTrade () {
+          this.disabled = true
+          this.$toast.loading({
+            duration: 0, // 持续展示 toast
+            forbidClick: true,
+            loadingType: 'spinner',
+          });
+          var data = {
+            id: this.exchangeInfo.id,
+            quantity: this.commodityNum,
+            actorInfo: this.selectedInfo,
+          }
+          let msgWithdraw = this.allCommodityList.find(item => {
+            return item.id === this.exchangeInfo.id
+          })
+          msgWithdraw.tradeCount -= this.commodityNum
+          postTrade(data, res => {
+            if (res.code === 0) {
+              this.isMask = this.isPopup = false
+              this.selectedInfo.points -= this.exchangeInfo.points * this.commodityNum,
+                this.approveCommodityList = this.allCommodityList?.filter(item => {
+                  this.commodityNum = 1
+                  this.isPlusBtn = true
+                  this.$toast.clear()
+                  this.popup(3)
+                  return item.points <= this.selectedInfo.points
+                })
+              // 更新添加最新一条
+              getPointsRecord({ actorId: this.selectedInfo.actorId, worldId: this.selectedInfo.worldId, lastId: 0, pageSize: 1 }, resPage => {
+                this.vipPointsRecordData.unshift(...resPage.data)
+              })
+            } else if (res.code === 1012) {
+              this.$toast.fail(this.$t('returnTips1012') + this.exchangeInfo.surplusCount);
+            }
+          })
+        },
+
+        // 商品兑换记录
+        onTradeRecord () {
+          if (!this.isLogin) {
+            this.onLogin()
+            return false
+          }
+          this.isRecord = true
+          this.isReward = false
+          getTradeRecord({ actorId: this.selectedInfo.actorId, worldId: this.selectedInfo.worldId, lastId: 0, pageSize: 20 }, res => {
+            this.exchangeRecordsData = res.data
+
+          })
+        },
+
+        // 退出登录
+        onLogout () {
+          const userParams = {
+            userId: this.selectedInfo.userId,
+            roleName: this.selectedInfo.actorName,
+            roleId: this.selectedInfo.actorId,
+            serverId: this.selectedInfo.worldId,
+            userName: this.selectedInfo.userName,
+          }
+          thinking.track('account_quit_suc', {
+            ...userParams
+          })
+          localStorage.removeItem('sdkAccessToken')
+          localStorage.removeItem('loginAccessToken')
+          loginToken = ''
+          this.isLogin = this.isMask = this.isPopup = this.isPageCent = this.isLoginTypeList = this.showRoleMsg = false
+          this.actorList = this.selectedInfo = []
+          this.actorId = ''
+          this.verfyActorName = ''
+          this.verifyCode = ''
+          this.isGetSms = false
+          this.verfyWorldName = ''
+          this.loginStep = 0
+          this.onDeleteRole()
+          this.onDeleteLoginVerify(0)
+          this.changeLang(this.activeLang)
+        },
+        onPoints (eventName) {
+          thinking.track(eventName, {// 去充值或获得积分
+            // role_id:this.selectedInfo.actorId,// 
+            // role_name:this.selectedInfo.actorName,
+            account_id: this.selectedInfo.userId,
+            account_name: this.selectedInfo.userName
+          })
+          this.isMask = this.isPopup = false
+          window.open(payUrl, '_blank')
+        },
+        // 福利弹窗
+        rewardsPopup (num) {
+          if (!this.isLogin) {
+            this.isRewards = false
+            this.onLogin()
+            return
+          }
+
+          this.isRewards = false
+          this.isPopupRewardsPublic = this.isMask = true
+          $('.popup .popup_rewards_cent').hide().eq(num).show()
+        },
+        // 查询福利商品列表
+        onRewards () {
+          this.$toast.loading({
+            duration: 0, // 持续展示 toast
+            forbidClick: true,
+            closeOnClick: true,
+            loadingType: 'spinner',
+          });
+          if (!this.isLogin) {
+            getTouristBenefits({
+              gameId: gameId,
+              gameVersion: this.areaData[0].gameVersion
+            }, res => {
+              this.$toast.clear()
+              this.rewardsList = res.data.products
+              this.rewardSendTime = res.data.endTime
+              this.rewardPayNum = res.data.payNum
+              this.isMask = this.isRewards = true
+            })
+            return false
+          }
+
+          getBenefits({ actorId: this.actorId, worldId: this.selectedInfo.worldId }, res => {
+            this.$toast.clear()
+            this.rewardsList = res.data.products
+            this.rewardSendTime = res.data.endTime
+            this.rewardPayNum = res.data.payNum
+            this.isMask = this.isRewards = true
+          })
+        },
+        // 兑换福利商品
+        onExchangeRewards (e) {
+          postBenefits({ id: e.id, actorInfo: this.selectedInfo }, res => {
+            let exchangeId = this.rewardsList.find(item => {
+              return item.id === e.id
+            })
+            exchangeId.status = 1
+            this.rewardsPopup(1)
+          })
+        },
+        // 查看福利商品兑记录
+        onRewardsRecord () {
+          if (!this.isLogin) {
+            this.isRewards = false
+            this.onLogin()
+            return
+          }
+          getRadeRecord({ actorId: this.actorId, worldId: this.selectedInfo.worldId, lastId: 0, pageSize: 20 }, res => {
+            this.rewardsPopup(0)
+            this.rewardsRecordList = res.data
+          })
+        },
+        openBack () {
+
+        },
+        // 客服链接
+        // 客服链接
+        goService () {
+          let appName = 'Epic War'
+          let language = i18n.locale
+          window.open(`https://shenzhenbingchuan.aihelp.net/webchatv4/#/appKey/SHENZHENBINGCHUAN_app_6840e847adb74b84ba74d80d4f03b5ea/domain/shenzhenbingchuan.aihelp.net/appId/shenzhenbingchuan_platform_07d2f323c3f586742f0f49bb1f783cfc/?entranceId=E2060&appName=${appName}&language=${language}&userTags=OnlineTop-up`)
+        },
+        showRewardDetail (item) {
+          this.selectedCommodity = item
+          this.isPopupRewardDetail = true;
+          this.isMask = true;
+        },
+        // 打开youtube视频
+        onTutorial () {
+          this.hhc = true
+          this.isPlayerMask = true
+          let youtubeUrl = 'jAmCRJIeNUk'
+          if (contentLanguage === "jaJP") {
+            youtubeUrl = 'jAmCRJIeNUk'
+          }
+
+          $('.video_wrapper').html(`<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${youtubeUrl}?autoplay=1&controls=1&enablejsapi=1&playsinline=1&loop=1&videoId=5WLAUxb8AUk&mute=0&widget_referrer=https%3A%2F%2Fgenshin.hoyoverse.com%2F&origin=https%3A%2F%2Fact.hoyoverse.com&widgetid=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>`)
+        },
+        // 关闭youtube视频
+        onPlayerMmask () {
+          this.isPlayerMask = false
+          $('.video_wrapper').html('')
+        },
+        onVipKnapsack (item) {
+          this.$refs.vipComp.onVipKnapsack(item);
+        }
+      }
+    })
+  </script>
+  <script src="js/prd-drawer.js"></script>
+  <!-- <script type="text/javascript" src="/js/statis.js"></script> -->
+</body>
+
+</html>

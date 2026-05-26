@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="43%" r="67%">
+      <stop offset="0" stop-color="#fff9cf"/>
+      <stop offset=".5" stop-color="#f0a052"/>
+      <stop offset="1" stop-color="#4f1407"/>
+    </radialGradient>
+    <linearGradient id="gem" x1="70" y1="46" x2="185" y2="205">
+      <stop offset="0" stop-color="#fff8c5"/>
+      <stop offset=".42" stop-color="#e45f24"/>
+      <stop offset="1" stop-color="#681a08"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="34" fill="#260b05"/>
+  <circle cx="128" cy="128" r="105" fill="url(#bg)"/>
+  <path d="M128 42l68 48-26 88-42 36-42-36-26-88z" fill="url(#gem)" stroke="#fff0a8" stroke-width="7"/>
+  <path d="M60 90h136l-68 124zM86 178l42-136 42 136" fill="none" stroke="#fff8c8" stroke-width="5" opacity=".5"/>
+  <path d="M83 93c21-18 67-29 98-11-28 6-59 17-83 37z" fill="#fff" opacity=".33"/>
+  <circle cx="128" cy="128" r="30" fill="#fff2a9" opacity=".78"/>
+  <path d="M128 105l8 16 18 3-13 13 3 18-16-9-16 9 3-18-13-13 18-3z" fill="#8e2a0f"/>
+</svg>

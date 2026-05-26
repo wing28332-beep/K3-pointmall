@@ -1,0 +1,22 @@
+{
+  "currentVersion": "v1.0.0",
+  "versions": [
+    {
+      "version": "v1.0.0",
+      "title": "游戏积分商城 / VIP中心 PRD",
+      "date": "2026-05-26",
+      "file": "prd/point-mall-prd-v1.0.0.md"
+    }
+  ],
+  "changelog": [
+    {
+      "version": "v1.0.0",
+      "date": "2026-05-26",
+      "items": [
+        "整理积分商城、登录与角色校验、积分/经验记录、VIP中心、多语言、接口、错误码、埋点与验收标准。",
+        "移除未启用或注释中的功能说明。",
+        "补充语言与地区、Content-Language、UTC、slogan 图片映射关系。"
+      ]
+    }
+  ]
+}

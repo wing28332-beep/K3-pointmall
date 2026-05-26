@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff5c6"/>
+      <stop offset=".52" stop-color="#e58938"/>
+      <stop offset="1" stop-color="#521605"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="48" y1="32" x2="204" y2="224">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".2" stop-color="#ffe78a"/>
+      <stop offset=".55" stop-color="#d86124"/>
+      <stop offset="1" stop-color="#6f1c0a"/>
+    </linearGradient>
+    <filter id="shine" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ffe999" flood-opacity=".8"/>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="34" fill="#2a0b05"/>
+  <circle cx="128" cy="128" r="105" fill="url(#sky)"/>
+  <path d="M128 30c24 20 50 29 80 31 2 71-23 123-80 164C71 184 46 132 48 61c30-2 56-11 80-31z" fill="url(#metal)" stroke="#fff0a0" stroke-width="6" filter="url(#shine)"/>
+  <path d="M128 51c18 14 38 23 60 27-1 54-20 93-60 124C88 171 69 132 68 78c22-4 42-13 60-27z" fill="#fff1b0" opacity=".2"/>
+  <path d="M128 62l18 39 43 5-31 30 8 43-38-21-38 21 8-43-31-30 43-5z" fill="#fff6c9"/>
+  <path d="M128 62v96l38 21-8-43 31-30-43-5z" fill="#b84616" opacity=".35"/>
+  <path d="M78 88c28 7 70 8 101-2-17 19-67 28-101 2z" fill="#fff" opacity=".35"/>
+</svg>

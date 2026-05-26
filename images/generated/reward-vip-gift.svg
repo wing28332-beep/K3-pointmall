@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="32" y1="20" x2="222" y2="236">
+      <stop offset="0" stop-color="#fff6c8"/>
+      <stop offset=".48" stop-color="#e87f37"/>
+      <stop offset="1" stop-color="#431105"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="58" y1="42" x2="199" y2="215">
+      <stop offset="0" stop-color="#fff4ae"/>
+      <stop offset=".45" stop-color="#ffca4f"/>
+      <stop offset="1" stop-color="#9f370f"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="34" fill="#250b05"/>
+  <circle cx="128" cy="128" r="105" fill="url(#bg)"/>
+  <path d="M64 104h128v94c0 10-8 18-18 18H82c-10 0-18-8-18-18z" fill="#8b2a10" stroke="#ffe79b" stroke-width="6"/>
+  <path d="M52 84h152v42H52z" fill="#d85a22" stroke="#fff0aa" stroke-width="6"/>
+  <path d="M116 84h24v132h-24zM52 100h152" fill="url(#ribbon)" stroke="#ffe68f" stroke-width="2"/>
+  <path d="M122 80c-29-4-49-15-47-31 3-19 36-14 53 31z" fill="none" stroke="#fff1a8" stroke-width="12"/>
+  <path d="M134 80c29-4 49-15 47-31-3-19-36-14-53 31z" fill="none" stroke="#fff1a8" stroke-width="12"/>
+  <path d="M89 151h78M97 174h62" stroke="#ffce69" stroke-width="8" stroke-linecap="round" opacity=".72"/>
+  <path d="M205 49l6 14 15 2-11 10 3 15-13-8-13 8 3-15-11-10 15-2zM45 56l4 10 11 2-8 7 2 11-9-6-10 6 3-11-8-7 11-2z" fill="#fff7bd"/>
+</svg>
