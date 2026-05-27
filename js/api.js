@@ -1,4 +1,13 @@
 function request (method, url, data, cb) {
+  if (window.K3PointMallMock && window.K3PointMallMock.enabled) {
+    var mockResponse = window.K3PointMallMock.responseFor(method, url, data)
+    if (mockResponse) {
+      setTimeout(function () {
+        apiCodeTips(mockResponse.code, cb, mockResponse)
+      }, 120)
+      return { mock: true, url: url }
+    }
+  }
   if (method === 'get') {
     return $.ajax({
       url: apiDomain + url + (data || !data == false ? queryParams(data, url) : ''),

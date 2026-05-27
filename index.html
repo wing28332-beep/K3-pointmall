@@ -24,6 +24,7 @@
   <script src="js/md5.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/mock-data.js"></script>
   <script src="js/api.js"></script>
   <script src="https://h5-ea.q1.com/js/thinking.js"></script>
   <link rel="stylesheet" href="/lib/vant@2.10/index.css" />
@@ -1364,6 +1365,10 @@
         },
         // 登录弹窗
         onLogin () {
+          if (window.K3PointMallMock && window.K3PointMallMock.enabled) {
+            window.K3PointMallMock.loginDemoRole(this)
+            return
+          }
           this.loginPopupDuration = Number((new Date().getTime() / 1000).toFixed(0))
           thinking.track('click_the_login_button', {
             click_button_time: this.loginPopupDuration
