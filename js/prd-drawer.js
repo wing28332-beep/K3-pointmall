@@ -126,23 +126,26 @@
   function createDrawer () {
     if (document.getElementById('prdDrawer')) return;
     var drawer = document.createElement('div');
-    drawer.className = 'prd_drawer';
+    drawer.className = 'prdDrawerHost';
     drawer.id = 'prdDrawer';
     drawer.innerHTML = [
-      '<div class="prd_drawer_overlay" data-prd-close></div>',
-      '<section class="prd_drawer_panel" role="dialog" aria-modal="true" aria-labelledby="prdDrawerTitle">',
-      '<aside class="prd_drawer_sidebar">',
-      '<div class="prd_drawer_log"><h3>更新日志</h3><div id="prdLog"></div></div>',
-      '<h3>版本</h3><select class="prd_version_select" id="prdVersion"></select>',
-      '<h3>文档目录</h3><nav class="prd_toc" id="prdToc"></nav>',
-      '</aside>',
-      '<main class="prd_drawer_main">',
-      '<header class="prd_drawer_header">',
-      '<div class="prd_drawer_title"><strong id="prdDrawerTitle">PRD文档</strong><span id="prdDrawerMeta"></span></div>',
-      '<button type="button" class="prd_drawer_close" data-prd-close aria-label="关闭PRD文档">×</button>',
-      '</header>',
-      '<article class="prd_doc" id="prdDoc"><div class="prd_loading">正在加载 PRD...</div></article>',
-      '</main>',
+      '<div class="prdDrawerMask" data-prd-close></div>',
+      '<aside class="prdDrawer" role="dialog" aria-modal="true" aria-labelledby="prdDrawerTitle">',
+      '<div class="prdDrawerHeader">',
+      '<div><strong id="prdDrawerTitle">PRD 文档</strong><span id="prdDrawerMeta"></span></div>',
+      '<button type="button" class="prdDrawerClose" data-prd-close aria-label="关闭PRD文档">×</button>',
+      '</div>',
+      '<div class="prdDrawerBody">',
+      '<nav class="prdSidebar">',
+      '<button type="button" class="prdNavItem active" id="prdChangelogBtn">更新日志</button>',
+      '<div class="prdNavTitle">版本</div>',
+      '<div id="prdVersion"></div>',
+      '<div class="prdVersionDesc" id="prdVersionDesc"></div>',
+      '<div class="prdNavTitle">目录</div>',
+      '<div id="prdToc"></div>',
+      '</nav>',
+      '<main class="prdMain" id="prdDoc"><section class="prdSection"><h2>PRD 加载中</h2><p class="prdLead">正在读取 PRD 内容...</p></section></main>',
+      '</div>',
       '</section>'
     ].join('');
     document.body.appendChild(drawer);
@@ -151,8 +154,8 @@
       if (event.target.hasAttribute('data-prd-close')) closeDrawer();
     });
 
-    document.getElementById('prdVersion').addEventListener('change', function (event) {
-      loadVersion(event.target.value);
+    document.getElementById('prdChangelogBtn').addEventListener('click', function () {
+      showChangelog();
     });
 
     document.addEventListener('keydown', function (event) {
@@ -165,7 +168,8 @@
   function openDrawer () {
     createDrawer();
     document.getElementById('prdDrawer').classList.add('is_open');
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('noscroll');
+    document.documentElement.classList.add('noscroll');
     if (!state.manifest) {
       loadManifest();
     }
@@ -175,7 +179,8 @@
     var drawer = document.getElementById('prdDrawer');
     if (!drawer) return;
     drawer.classList.remove('is_open');
-    document.body.style.overflow = '';
+    document.body.classList.remove('noscroll');
+    document.documentElement.classList.remove('noscroll');
   }
 
   function loadManifest () {
@@ -190,24 +195,21 @@
         loadVersion(manifest.currentVersion || (manifest.versions[0] && manifest.versions[0].version));
       })
       .catch(function () {
-        document.getElementById('prdDoc').innerHTML = '<div class="prd_error">PRD 配置加载失败，请稍后重试。</div>';
+        document.getElementById('prdDoc').innerHTML = '<section class="prdSection"><h2>PRD 加载失败</h2><p class="prdLead">PRD 配置加载失败，请稍后重试。</p></section>';
       });
   }
 
   function renderManifest () {
-    var versionSelect = document.getElementById('prdVersion');
-    versionSelect.innerHTML = state.manifest.versions.map(function (item) {
-      return '<option value="' + escapeHtml(item.version) + '">' + escapeHtml(item.version + ' - ' + item.title) + '</option>';
+    var versionBox = document.getElementById('prdVersion');
+    versionBox.innerHTML = state.manifest.versions.map(function (item) {
+      return '<button type="button" class="prdNavItem prdVersionItem" data-version="' + escapeHtml(item.version) + '">' + escapeHtml(item.version) + '</button>';
     }).join('');
 
-    document.getElementById('prdLog').innerHTML = state.manifest.changelog.map(function (log) {
-      return [
-        '<div class="prd_drawer_log_item">',
-        '<div class="prd_drawer_log_meta"><strong>' + escapeHtml(log.version) + '</strong><span>' + escapeHtml(log.date) + '</span></div>',
-        '<ul>' + log.items.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('') + '</ul>',
-        '</div>'
-      ].join('');
-    }).join('');
+    versionBox.querySelectorAll('button').forEach(function (button) {
+      button.addEventListener('click', function () {
+        loadVersion(button.getAttribute('data-version'));
+      });
+    });
   }
 
   function findVersion (version) {
@@ -220,10 +222,14 @@
     if (!version) return;
     var item = findVersion(version);
     state.currentVersion = item.version;
-    document.getElementById('prdVersion').value = item.version;
     document.getElementById('prdDrawerTitle').textContent = item.title;
     document.getElementById('prdDrawerMeta').textContent = item.version + ' / ' + item.date;
-    document.getElementById('prdDoc').innerHTML = '<div class="prd_loading">正在加载 PRD...</div>';
+    document.getElementById('prdVersionDesc').textContent = item.title || '';
+    document.querySelectorAll('.prdVersionItem').forEach(function (button) {
+      button.classList.toggle('active', button.getAttribute('data-version') === item.version);
+    });
+    document.getElementById('prdChangelogBtn').classList.remove('active');
+    document.getElementById('prdDoc').innerHTML = '<section class="prdSection"><h2>PRD 加载中</h2><p class="prdLead">正在读取 PRD 内容...</p></section>';
 
     fetch(item.file, { cache: 'no-cache' })
       .then(function (response) {
@@ -231,12 +237,32 @@
         return response.text();
       })
       .then(function (markdown) {
-        document.getElementById('prdDoc').innerHTML = markdownToHtml(markdown);
+        document.getElementById('prdDoc').innerHTML = '<section class="prdSection prdDoc">' + markdownToHtml(markdown) + '</section>';
         renderToc();
       })
       .catch(function () {
-        document.getElementById('prdDoc').innerHTML = '<div class="prd_error">PRD 文档加载失败，请检查文档文件是否存在。</div>';
+        document.getElementById('prdDoc').innerHTML = '<section class="prdSection"><h2>PRD 加载失败</h2><p class="prdLead">PRD 文档加载失败，请检查文档文件是否存在。</p></section>';
       });
+  }
+
+  function showChangelog () {
+    if (!state.manifest) return;
+    document.getElementById('prdChangelogBtn').classList.add('active');
+    document.querySelectorAll('.prdVersionItem').forEach(function (button) {
+      button.classList.remove('active');
+    });
+    document.getElementById('prdToc').innerHTML = '';
+    document.getElementById('prdDoc').innerHTML = [
+      '<section class="prdSection">',
+      '<h2>更新日志</h2>',
+      '<table class="prdTable"><thead><tr><th>版本</th><th>更新内容</th><th>更新日期</th><th>更新人</th></tr></thead><tbody>',
+      state.manifest.changelog.map(function (log) {
+        return '<tr><td>' + escapeHtml(log.version) + '</td><td>' + escapeHtml((log.items || []).join('；')) + '</td><td>' + escapeHtml(log.date) + '</td><td>' + escapeHtml(log.owner || '-') + '</td></tr>';
+      }).join(''),
+      '</tbody></table>',
+      '</section>'
+    ].join('');
+    document.getElementById('prdDoc').scrollTop = 0;
   }
 
   function renderToc () {
@@ -244,10 +270,10 @@
     toc.innerHTML = state.headings
       .filter(function (item) { return item.level > 1; })
       .map(function (item) {
-        return '<a class="level_' + item.level + '" href="#' + escapeHtml(item.id) + '" data-target="' + escapeHtml(item.id) + '">' + escapeHtml(item.text) + '</a>';
+        return '<button type="button" class="prdCatalogItem level_' + item.level + '" data-target="' + escapeHtml(item.id) + '">' + escapeHtml(item.text) + '</button>';
       }).join('');
 
-    toc.querySelectorAll('a').forEach(function (link) {
+    toc.querySelectorAll('button').forEach(function (link) {
       link.addEventListener('click', function (event) {
         event.preventDefault();
         var target = document.getElementById(link.getAttribute('data-target'));
@@ -268,7 +294,7 @@
       if (node && node.offsetTop <= doc.scrollTop + 80) active = heading.id;
     });
 
-    toc.querySelectorAll('a').forEach(function (link) {
+    toc.querySelectorAll('button').forEach(function (link) {
       link.classList.toggle('is_active', link.getAttribute('data-target') === active);
     });
   }
