@@ -1366,8 +1366,7 @@
         // 登录弹窗
         onLogin () {
           if (window.K3PointMallMock && window.K3PointMallMock.enabled) {
-            window.K3PointMallMock.loginDemoRole(this)
-            return
+            window.K3PointMallMock.prepareVerifyLogin(this)
           }
           this.loginPopupDuration = Number((new Date().getTime() / 1000).toFixed(0))
           thinking.track('click_the_login_button', {
@@ -1509,6 +1508,9 @@
             this.$toast.clear()
             this.isThroughVerify = true
             this.isPageCent = this.isLoginTypeList = this.isPopupLogin = this.isLoginMask = true
+            if (window.K3PointMallMock && window.K3PointMallMock.enabled) {
+              return
+            }
             var configData = []
             this.loginTypeList.forEach((e, eIndex) => {
               e.containerId = '0'

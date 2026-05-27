@@ -301,7 +301,16 @@
       return { code: 0, data: { actorInfo: { roleName: actors[0].actorName }, configurations: [] } }
     }
     if (url.indexOf('/login/token?') === 0 || url.indexOf('/login/extend/token?') === 0 || url.indexOf('/login/VerifyCode?') === 0) {
+      if (url.indexOf('/login/VerifyCode?') === 0) {
+        var expectedCode = md5(encodeURIComponent('123456' + codeSecretKey))
+        if (!data || data.code !== expectedCode) {
+          return { code: 1302, data: null, msg: 'Mock verification code must be 123456' }
+        }
+      }
       return { code: 0, data: { accessToken: 'mock-access-token' } }
+    }
+    if (url.indexOf('/login/smscode?') === 0) {
+      return { code: 0, data: { sent: true, code: '123456' } }
     }
     if (url.indexOf('/product/tourist?') === 0 || url.indexOf('/product?') === 0) {
       return { code: 0, data: clone(products) }
@@ -344,13 +353,28 @@
     vm.init('init')
   }
 
+  function prepareVerifyLogin (vm) {
+    var actor = actors[0]
+    vm.gameVersion = actor.gameVersion
+    vm.actorId = actor.actorId
+    vm.actorName = ''
+    vm.worldName = actor.worldName
+    vm.loginStep = 0
+    vm.isThroughVerify = false
+    vm.isVerifyError = false
+    if (typeof vm.onDeleteLoginVerify === 'function') {
+      vm.onDeleteLoginVerify(0)
+    }
+  }
+
   window.K3PointMallMock = {
     enabled: enabled,
     actors: actors,
     products: products,
     vipLevels: vipLevels,
     responseFor: responseFor,
-    loginDemoRole: loginDemoRole
+    loginDemoRole: loginDemoRole,
+    prepareVerifyLogin: prepareVerifyLogin
   }
   if (enabled && !window.thinking) {
     window.thinking = {
